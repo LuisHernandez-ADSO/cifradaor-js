@@ -3,41 +3,64 @@
 const MAYUS = "ABCDEFGHIJKLMNÑOPQRSTUVWXYZ";
 const MINUS = "abcdefghijklmnñopqrstuvwxyz";
 const TILDES_MAYUS = "ÁÉÍÓÚÜ";
-
 const TILDES_MINUS = "áéíóúü";
 const GRUPOS = [MAYUS, MINUS, TILDES_MAYUS, TILDES_MINUS];
-// ===== Clave =====
-const CLAVE = 3;
-// ===== Piezas =====
-// Mueve un carácter k posiciones dentro de su grupo.
-// Si no pertenece a ningún grupo (espacio, número, signo), lo deja igual.
+const CLAVE_ZIGZAG = 5;
+
 function moverCaracter(caracter, k) {
     for (const alfabeto of GRUPOS) {
+
         const posicion = alfabeto.indexOf(caracter);
         if (posicion !== -1) {
+
             const n = alfabeto.length;
-            // + n y % n otra vez: evita posiciones negativas al descifrar
             const nueva = ((posicion + k) % n + n) % n;
             return alfabeto[nueva];
+
         }
     }
     return caracter;
 }
-// Aplica el desplazamiento a todo el texto
-function cesar(texto, k) {
+
+function progresivoMitad(texto, direccion) {
     let resultado = "";
-    for (const caracter of texto) {
-        resultado += moverCaracter(caracter, k);
+    const mitad = (texto.length - (texto.length % 2)) / 2; // Calculo la mitad de abajo del arreglo
+
+    for (let i = 0; i < texto.length; i++) {
+
+        let desplazamiento = i + 1 
+
+        if (i >= mitad) desplazamiento = (i - mitad) + 1
+
+        resultado += moverCaracter(texto[i], direccion * desplazamiento);
     }
     return resultado;
 }
-// ===== Sistema del grupo =====
+
+function zigZag(texto, k, direccion) {
+    let resultado = "";
+    for (let i = 0; i < texto.length; i++) {
+
+        let signo = -1
+        if (i % 2 == 0) signo = 1
+
+        resultado += moverCaracter(texto[i], direccion * signo * k);
+    }
+    return resultado;
+}
+
 function cifrar(texto) {
-    return cesar(texto, CLAVE);
+    const paso1 = progresivoMitad(texto, 1);
+    const paso2 = zigZag(paso1, CLAVE_ZIGZAG, 1);
+    return paso2;
 }
+
 function descifrar(texto) {
-    return cesar(texto, -CLAVE);
+    const paso1 = zigZag(texto, CLAVE_ZIGZAG, -1);
+    const paso2 = progresivoMitad(paso1, -1);
+    return paso2;
 }
+
 // ================= PARTE 2: ARCHIVOS =================
 const selector = document.getElementById("archivo");
 
